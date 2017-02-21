@@ -9,7 +9,7 @@ var start;
 var cumulative;
 
 var canvas;
-var output;
+var output = -1;
 var currentBox = -1;
 var activeBox = -1;
 var sequence;
@@ -28,8 +28,30 @@ function preload() {
     } else {
       console.log("WebMidi enabled!");
       console.log(WebMidi.inputs);
-      console.log(WebMidi.outputs);
-      output = WebMidi.getOutputByName("IAC Driver Bus 1");
+      console.log(WebMidi.outputs[1].name);
+      output = WebMidi.getOutputByName(WebMidi.outputs[0].name);
+      createP('');
+
+		  dropdown = createElement('select');
+		  var options = [];
+		  for(var d=0; d<WebMidi.outputs.length; d++) {
+		  	options.push(WebMidi.outputs[d].name);
+		  } 
+
+		  console.log(options)
+		  for (var i = 0; i < options.length; i++) {
+		    var option = createElement('option');
+		    option.attribute('value',options[i]);
+		    option.html(options[i]);
+		    option.parent(dropdown);
+		  }
+
+		  dropdown.elt.onchange = function() {
+
+    		output = WebMidi.getOutputByName(this.value);
+  		}
+
+
     }
   
   });
@@ -38,22 +60,23 @@ function preload() {
 function setup() {
 
   canvas = createCanvas(1000, 600);
-
+  frameRate(30)
   //shift pitches down two octaves
   for(var h=0; h<notes.length; h++) {
   	notes[h] = notes[h]-12;
  	}
 
-  var ww = canvas.width-1;
+  var ww = rightEdge-leftEdge-1;
   var wh = canvas.height-1;
   var temparray;
   sequence = new noteSequence();
 
 
+
   for(var i=0; i<notes.length; i++) {
     temparray = [];
     for(var ii=0; ii<notes.length; ii++) {
-    	temparray.push(new rectBox((i*ww)/notes.length,(ii*wh)/notes.length,ww/notes.length,wh/notes.length,notes[i],notes[ii],i*notes.length+ii))
+    	temparray.push(new rectBox(leftEdge+(i*ww)/notes.length,(ii*wh)/notes.length,ww/notes.length,wh/notes.length,notes[i],notes[ii],i*notes.length+ii))
     }
     boxes.push(temparray)
   }
@@ -72,7 +95,6 @@ function makeOscs() {
   osc2.start();
   osc2.amp(0);
 }
-
 
 // A function to play a note
 function playNotes(duration) {
@@ -103,22 +125,7 @@ function draw() {
   clear();
   
   if((millis()-start) >= cumulative) sequence.playSequence();
-  /*for(var i=0; i< notes.length; i++) {
-    noFill();
-    if(i==thisV) verticals[i].sketch('rgba(0,255,0, 0.25)');
-    else verticals[i].sketch();
-    noFill();
-    if(i==thisH) horiz[i].sketch('rgba(0,255,0, 0.25)')
-    else horiz[i].sketch()
-    if(!mouseIsPressed) {
-      //get mouse quadrants
-      hit = collidePointRect(mouseX,mouseY,verticals[i].x,verticals[i].y,verticals[i].width,verticals[i].height);
-      if(hit) thisV = i;
-      hit = collidePointRect(mouseX,mouseY,horiz[i].x,horiz[i].y,horiz[i].width,horiz[i].height);
-      if(hit) thisH = i;
-    }
-  }
-*/
+
   for(var g=0; g<boxes.length; g++) {
   	for(var h=0; h<boxes.length; h++) {
   		hit = collidePointRect(mouseX, mouseY, boxes[g][h].x, boxes[g][h].y, boxes[g][h].width, boxes[g][h].height);
@@ -217,13 +224,15 @@ function noteSequence() {
 		for(var i=0; i<this.seqArray.length; i++) {
 			
 			if(i>0) {
-				output.playNote([this.seqArray[i].note1,this.seqArray[i].note2], "all", {duration: this.seqArray[i].chordLength, time:"+"+cumulative});
-				console.log(this.seqArray[i].note1+' '+this.seqArray[i].note2+' '+this.seqArray[i].chordLength+' '+"+"+cumulative)
+				output.playNote(this.seqArray[i].note1, 1, {duration: this.seqArray[i].chordLength, time:"+"+cumulative});
+				output.playNote(this.seqArray[i].note2, 2, {duration: this.seqArray[i].chordLength, time:"+"+cumulative});
+				//console.log(this.seqArray[i].note1+' '+this.seqArray[i].note2+' '+this.seqArray[i].chordLength+' '+"+"+cumulative);
 				cumulative += this.seqArray[i].chordLength;
 			}
 			else {
-				console.log(this.seqArray[i].note1+' '+this.seqArray[i].note2+' '+this.seqArray[i].chordLength)
-				output.playNote([this.seqArray[i].note1, this.seqArray[i].note2], "all", {duration: this.seqArray[i].chordLength,time:"+"+1});
+				//console.log(this.seqArray[i].note1+' '+this.seqArray[i].note2+' '+this.seqArray[i].chordLength);
+				output.playNote(this.seqArray[i].note1, 1, {duration: this.seqArray[i].chordLength,time:"+"+1});
+				output.playNote(this.seqArray[i].note2, 2, {duration: this.seqArray[i].chordLength,time:"+"+1});
 				cumulative += this.seqArray[i].chordLength
 			}
 
@@ -243,8 +252,9 @@ function noteSequence() {
 	}
 
 	this.addItem = function(boxToAdd) {
-		if(this.seqArray.length>0 && this.seqArray[this.seqArray.length-1].id == boxToAdd.id) return;
-		this.seqArray.push(boxToAdd)
+		
+		//keeps from adding same chord twice
+		if(!this.seqArray.includes(boxToAdd)) this.seqArray.push(boxToAdd)
 		
 		// debug comments
 		//console.log('added box '+boxToAdd.id)
