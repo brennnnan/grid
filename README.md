@@ -1,5 +1,5 @@
 # Grid tones
-This is an experiment with sending Midi from the browser to DAW's like Abletone or Logic.
+This is an experiment with sending Midi from the browser to DAW's like Ableton or Logic.
 It was inspired somewhat by Laurie Spiegel's Music Mouse and some of Brian Eno's music.
 
 Each axis corresponds to two octaves and each box represents the combination of the two tones where it resides.
