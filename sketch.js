@@ -1,4 +1,4 @@
-var notes = [ 60,62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79, 81, 83,84];
+var notes = [ 60,61,62,63,64,65,66,67,68,69,70,71,72];
 
 var osc1, osc2;
 var lastV = -1;
@@ -7,6 +7,7 @@ var thisH, thisV;
 var boxes = [];
 var start;
 var cumulative;
+var playing = 0;
 
 var canvas;
 var output = -1;
@@ -124,7 +125,7 @@ function playNotes(duration) {
 function draw() {
   clear();
   
-  if((millis()-start) >= cumulative) sequence.playSequence();
+  if((millis()-start) >= cumulative && playing==1) sequence.playSequence();
 
   for(var g=0; g<boxes.length; g++) {
   	for(var h=0; h<boxes.length; h++) {
@@ -138,6 +139,8 @@ function draw() {
   			}
   			// color green if hovering
   			boxes[g][h].sketch('rgba(0,255,0, 0.25)');
+  			fill(51)
+  			text(""+noteToMidi(boxes[g][h].note1)+"  "+noteToMidi(boxes[g][h].note2), boxes[g][h].x+5, boxes[g][h].y+25)
   			noFill();
   			continue;
   		} 
@@ -194,7 +197,11 @@ function mouseReleased() {
 
 function keyPressed() {
   if (keyCode === 32) {
-    sequence.playSequence()
+  	if(playing === 0) {
+  		sequence.playSequence();
+  		playing = 1;
+  		return;
+  	} else if(playing == 1) playing = 0;
   }
 }
 
@@ -227,13 +234,13 @@ function noteSequence() {
 				output.playNote(this.seqArray[i].note1, 1, {duration: this.seqArray[i].chordLength, time:"+"+cumulative});
 				output.playNote(this.seqArray[i].note2, 2, {duration: this.seqArray[i].chordLength, time:"+"+cumulative});
 				//console.log(this.seqArray[i].note1+' '+this.seqArray[i].note2+' '+this.seqArray[i].chordLength+' '+"+"+cumulative);
-				cumulative += this.seqArray[i].chordLength;
+				cumulative += this.seqArray[i].chordLength+1;
 			}
 			else {
 				//console.log(this.seqArray[i].note1+' '+this.seqArray[i].note2+' '+this.seqArray[i].chordLength);
 				output.playNote(this.seqArray[i].note1, 1, {duration: this.seqArray[i].chordLength,time:"+"+1});
 				output.playNote(this.seqArray[i].note2, 2, {duration: this.seqArray[i].chordLength,time:"+"+1});
-				cumulative += this.seqArray[i].chordLength
+				cumulative += this.seqArray[i].chordLength+1
 			}
 
 		}
