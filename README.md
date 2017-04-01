@@ -4,7 +4,7 @@ It was inspired somewhat by Laurie Spiegel's Music Mouse and some of Brian Eno's
 
 Each axis corresponds to two octaves and each box represents the combination of the two tones where it resides.
 
-##How to use:
+## How to use:
 - Set up an internal midi network. If you are on Mac you can just open Audio Midi setup and turn on the IAC driver. 
 - Open up Ableton or another DAW and configure the inputs. The default sends one note to channel 1 and the other to channel 2.
 - Select the corresponding Midi output from the dropdown on the page.
