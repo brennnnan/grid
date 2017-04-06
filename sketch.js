@@ -29,7 +29,7 @@ function preload() {
     } else {
       console.log("WebMidi enabled!");
       console.log(WebMidi.inputs);
-      console.log(WebMidi.outputs[1].name);
+      console.log(WebMidi.outputs);
       output = WebMidi.getOutputByName(WebMidi.outputs[0].name);
       createP('  1. Select correct midi output from below.<br>  2. Click on boxes to add them to looping sequence. Each box represents the two notes at its x and y points.<br>  3. Change duration of interval by clicking on square and dragging up or down. Remove interval from sequence by option+clicking on it.<br>  4. Press space to start playing.');
 
